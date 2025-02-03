@@ -1,9 +1,9 @@
 from django.contrib import admin
 from django.urls import path
-from .views import Index,SignUpView,Dashboard, AddItem,UpdateItem,DeleteItem
+from .views import Index,SignUpView,Dashboard, AddItem,UpdateItem,DeleteItem,ViewItem,Searchbar,AddStaff,StaffView,UpdateStaff, DeleteStaff,IssueOutItem, get_inventory_quantity,import_data
 from django.contrib.auth import views as auth_views
 #from django.contrib.auth.views import LogoutView
-
+from . import views
 
 
 urlpatterns = [
@@ -14,5 +14,21 @@ urlpatterns = [
     path('logout/', auth_views.LogoutView.as_view(template_name='inventory/login.html'), name='logout'),
    path('add-item/', AddItem.as_view(), name ='add-item'),
    path('edit-item/<int:pk>', UpdateItem.as_view(), name='edit-item'),
-   path('delete-item/<int:pk>', DeleteItem.as_view(), name='delete-item')
+   path('delete-item/<int:pk>', DeleteItem.as_view(), name='delete-item'),
+   path('view-item/<int:pk>', ViewItem.as_view(), name='view-item'),
+    path('add-staff/', AddStaff.as_view(), name='add-staff'),
+
+
+   path('search/', views.Searchbar, name='searchbar'),
+    path('staff/', StaffView.as_view(), name='staff'),
+  path('edit-staff/<int:pk>', UpdateStaff.as_view(), name='edit-staff'),
+   path('delete-staff/<int:pk>', DeleteStaff.as_view(), name='delete-staff'),
+   path('issue-out/<int:pk>', IssueOutItem.as_view(), name='issue-out'),
+
+
+    path('get-inventory-quantity/<int:inventory_id>/', get_inventory_quantity, name='get_inventory_quantity'),
+     path('import-data/', views.import_data, name='import-data'),
+
+
+ 
 ]

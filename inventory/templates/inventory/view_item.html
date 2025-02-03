@@ -1,0 +1,34 @@
+
+{% extends 'inventory/base.html'%}
+
+
+{% load crispy_forms_tags %}
+
+{% block content%}
+
+
+<a href="{% url 'dashboard'%}" class="btn btn-outline-primary my-3 mx-4"> Go Back</a>
+<div class="row">
+<div class="col-11 col-md-4 mx-auto mt-5">
+<table>
+<th>{{object.name}}</th>
+<tbody>
+    <tr>
+    <th>Quantity</th>
+    <th>Catergory</th>
+    </tr>
+    <tr>
+        <td>{{ object.quantity }}</td>
+        <td>{{object.category}}</td>
+    </tr>
+    </tbody>
+</tbody>
+</table>
+</div>
+
+</div>
+
+
+
+
+{% endblock content %}

@@ -1,0 +1,21 @@
+{%extends 'inventory/base.html'%}
+
+
+
+{%block content %}
+
+{% if items %}
+<h1>Search Result Found</h1><br>
+
+<a href="{% url 'dashboard'%}" class="btn btn-outline-primary my-3 mx-4"> Go Back</a>
+
+{% for item in items %}
+<h2><a href="{% url 'view-item' item.id %}">{{item.name}}</a></h2>
+{% endfor%}
+
+{% else %}
+<h1>Nothing Found</h1>
+
+{% endif%}
+
+{% endblock content%}
