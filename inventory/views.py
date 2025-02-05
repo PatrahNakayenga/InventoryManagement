@@ -10,20 +10,26 @@ from inventoryMnanagemnet.settings import LOW_QUANTITY
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 import csv
-
-
-
+from .decorators import allowed_user,admin_only,unauthenticated_user
+from django.contrib.auth.models import Group
+from django.utils.decorators import method_decorator
  #from django.contrib.auth.views import LogoutView
 
 
 
 # Create your views here.
 
-class Index(TemplateView):
+
+
+class Index( TemplateView):
     template_name = 'inventory/index.html'
    
 
+@method_decorator(admin_only, name='dispatch') 
 class Dashboard(LoginRequiredMixin, View):
+    
+    
+    
     def get(self, request):
         items = inventoryItem.objects.filter(user=self.request.user.id).order_by('id')
 
@@ -47,20 +53,46 @@ class Dashboard(LoginRequiredMixin, View):
 
 
         return render(request, 'inventory/dashboard.html', {'items':items, 'low_inventory_ids': low_inventory_ids})
+#@method_decorator(admin_only, name='dispatch') 
 
 
+
+
+@method_decorator(unauthenticated_user, name='dispatch')
 class SignUpView(View):
+
     def get(self, request):
         form = UserRegisterForm()
         return render(request, 'inventory/signup.html', {'form': form})
     def post(self, request):
         form = UserRegisterForm(request.POST)
         if form.is_valid():
-            form.save()
+            #form.save()
+            user = form.save(commit=False)  # Don't save yet
+            user.save()
+            group_name = form.cleaned_data['Group']
+            group = Group.objects.filter(name=group_name).first()
+
+
+            if group:
+                user.groups.add(group)
+            #user.groups.add(group)
+
+
             user = authenticate(
                 username = form.cleaned_data['username'],
                 password = form.cleaned_data['password1'],
+
+                #group = Group.object.get(name='Staff')
+                #user.groups.add(group)
             )
+
+            #if user:
+                #login(request, user)
+                #return redirect('index')
+
+
+
             login(request, user)
             return redirect('index')
         return render(request, 'inventory/signup.html', {'form': form})
@@ -70,6 +102,9 @@ class SignUpView(View):
 
 
 
+
+####
+@method_decorator(admin_only, name='dispatch') 
 class AddItem(LoginRequiredMixin, CreateView):
         model = inventoryItem
         form_class = InventoryItemForm
@@ -94,7 +129,7 @@ class AddItem(LoginRequiredMixin, CreateView):
 
 
 
-
+@method_decorator(admin_only, name='dispatch') 
 class UpdateItem(LoginRequiredMixin, UpdateView):
     model = inventoryItem
     form_class = InventoryItemForm
@@ -102,7 +137,7 @@ class UpdateItem(LoginRequiredMixin, UpdateView):
     success_url = reverse_lazy('dashboard')
 
 
-
+@method_decorator(admin_only, name='dispatch') 
 class DeleteItem(LoginRequiredMixin, DeleteView):
     model = inventoryItem
     template_name = 'inventory/delete_item.html'
@@ -112,7 +147,7 @@ class DeleteItem(LoginRequiredMixin, DeleteView):
 
 
 
-
+@method_decorator(admin_only, name='dispatch') 
 class ViewItem(LoginRequiredMixin, DetailView):
     model = inventoryItem
     template_name='inventory/view_item.html'
@@ -124,7 +159,7 @@ class ViewItem(LoginRequiredMixin, DetailView):
 
 
 @login_required
-
+@method_decorator(admin_only, name='dispatch') 
 def Searchbar(request):
     if request.method == 'GET':
         search = request.GET.get('search')
@@ -133,9 +168,10 @@ def Searchbar(request):
 
  
 
+        model = inventoryItem
 
 
-
+@method_decorator(admin_only, name='dispatch') 
 class AddStaff(LoginRequiredMixin, CreateView):
         model = Staff
         form_class = StaffForm
@@ -153,6 +189,7 @@ class AddStaff(LoginRequiredMixin, CreateView):
 
 
 
+@method_decorator(admin_only, name='dispatch') 
 class StaffView(LoginRequiredMixin, ListView):
     model = Staff
     template_name='staff.html'
@@ -160,7 +197,7 @@ class StaffView(LoginRequiredMixin, ListView):
 
 
 
-
+@method_decorator(admin_only, name='dispatch') 
 
 class UpdateStaff(LoginRequiredMixin, UpdateView):
     model = Staff
@@ -169,8 +206,9 @@ class UpdateStaff(LoginRequiredMixin, UpdateView):
     success_url = reverse_lazy('staff')
 
 
-
+@method_decorator(admin_only, name='dispatch') 
 class DeleteStaff(LoginRequiredMixin, DeleteView):
+
     model = Staff
     template_name = 'inventory/delete_staff.html'
 
@@ -179,14 +217,14 @@ class DeleteStaff(LoginRequiredMixin, DeleteView):
 
 
 
-
+@method_decorator(admin_only, name='dispatch') 
 class ViewStaff(LoginRequiredMixin, DetailView):
     model = Staff
     template_name='inventory/view_staff.html'
 
 
 
-
+@method_decorator(admin_only, name='dispatch') 
 
 class IssueOutItem(LoginRequiredMixin,CreateView):
     model = IssueOut
@@ -235,7 +273,7 @@ class IssueOutItem(LoginRequiredMixin,CreateView):
 
 
 
-
+@method_decorator(admin_only, name='dispatch') 
 
 def get_inventory_quantity(request, inventory_id):
     try:
@@ -252,7 +290,7 @@ def get_inventory_quantity(request, inventory_id):
 
 
 @login_required
-
+@allowed_user(allowed_roles='Admin')
 # csv import view
 def import_data(request):
     if request.method == 'POST':
@@ -321,3 +359,45 @@ def import_data(request):
         form= UploadForm()
     return render(request, 'inventory/import.html', {'form':form})
                 
+
+
+
+
+def staff_apply(request):
+    context={}
+    return render(request, 'inventory/staff-apply.html', context)
+ 
+
+
+
+
+
+"""
+class staff_apply(TemplateView):
+    template_name = 'inventory/staff-apply.html'
+
+
+    """
+
+
+
+
+
+
+
+# views.py
+"""
+from django.contrib.auth.views import LoginView
+from django.urls import reverse
+
+class CustomLoginView(LoginView):
+    def get_redirect_url(self):
+        # Check if the user is in the 'Staff' group
+        if self.request.user.groups.filter(name="Staff").exists():
+            return reverse('staff_apply')  # Redirect staff users to 'staff_apply' view
+        return super().get_redirect_url()  # Redirect admins to default (usually index)
+
+
+
+
+"""

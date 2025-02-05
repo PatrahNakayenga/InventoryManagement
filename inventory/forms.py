@@ -1,15 +1,16 @@
 from django import forms
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User,Group
 from django.contrib.auth.forms import UserCreationForm
 
 from .models import inventoryItem, Category,Department,Staff,IssueOut
 
 class UserRegisterForm(UserCreationForm):
+    Group = forms.ModelChoiceField(queryset=Group.objects.all(), required=True, label="User Group")
     email= forms.EmailField()
     
     class Meta:
         model = User
-        fields = ['username', 'email', 'password1', 'password2']
+        fields = ['username', 'email','Group', 'password1', 'password2']
 
 
 

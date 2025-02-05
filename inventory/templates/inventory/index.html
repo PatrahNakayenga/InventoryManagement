@@ -8,7 +8,17 @@
             <h1 class="fw-light"> Track Your inventory</h1>
             <p class="fw-light">Track and Manage your Inventory and receive alerts on low inventory</p>
             <div>
-            <a href="{% url 'dashboard'%}" class="btn btn-primary"> Get started</a>
+                {% for group in user.groups.all %}
+                {% if group.name == "Staff" %}
+                <a href="{% url 'staff-apply' %}" class=" btn btn-outline-primary">Request for Equipments</a>
+                {% else %}
+
+                <a href="{% url 'dashboard' %}" class="btn-outline-primary">Go to Dashboard</a>
+                   
+                {% endif %}
+            
+                
+            {% endfor %}
             </div>
         </div>
     </div>

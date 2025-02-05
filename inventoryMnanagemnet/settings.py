@@ -135,7 +135,7 @@ CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 
-LOGIN_REDIRECT_URL = 'dashboard'  # This will redirect to the dashboard view
+LOGIN_REDIRECT_URL = 'index'  # This will redirect to the dashboard view
 LOGIN_URL = 'login'
 
 
